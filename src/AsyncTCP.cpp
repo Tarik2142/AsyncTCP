@@ -456,7 +456,9 @@ static esp_err_t _tcp_output(tcp_pcb* pcb, int8_t closed_slot) {
 static err_t _tcp_write_api(struct tcpip_api_call_data* api_call_msg) {
   tcp_api_call_t* msg = (tcp_api_call_t*)api_call_msg;
   msg->err = ERR_CONN;
-  if (msg->closed_slot == INVALID_CLOSED_SLOT || !_closed_slots[msg->closed_slot]) {
+  
+  const uint32_t new_rcv_ann_wnd = msg->pcb->rcv_ann_right_edge - msg->pcb->rcv_nxt;
+    if((msg->closed_slot == -1 || !_closed_slots[msg->closed_slot]) && (new_rcv_ann_wnd <= 0xffff || LWIP_WND_SCALE)) {
     msg->err = tcp_write(msg->pcb, msg->write.data, msg->write.size, msg->write.apiflags);
   }
   return msg->err;

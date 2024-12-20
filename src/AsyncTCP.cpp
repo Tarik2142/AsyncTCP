@@ -342,7 +342,14 @@ static int8_t _tcp_recv(void* arg, struct tcp_pcb* pcb, struct pbuf* pb, int8_t 
     e->fin.pcb = pcb;
     e->fin.err = err;
     // close the PCB in LwIP thread
-    AsyncClient::_s_lwip_fin(e->arg, e->fin.pcb, e->fin.err);
+
+    if (arg == NULL) {
+      free((void*)(e));
+      return ERR_CLSD;
+
+    } else {
+      AsyncClient::_s_lwip_fin(e->arg, e->fin.pcb, e->fin.err);
+    }
   }
   if (!_send_async_event(&e)) {
     free((void*)(e));
